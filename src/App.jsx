@@ -10,7 +10,7 @@ import React, { useEffect, useMemo, useState } from "react";
      - Who has access: Anyone
   5. Paste the deployed Web App URL below.
 */
-const GOOGLE_SCRIPT_URL = "https://docs.google.com/spreadsheets/d/1OvhDvQ1xKkJN-iuiWfS7rbyC31FFGP60uTjh9WgI0oM/edit?gid=486070429#gid=486070429";
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyMEbmnPI9yM9cvfkTqQeTr7ILkIzkynG6PECLgwpmCx-1A4G2gKIapNtqVd0azfht3Ww/exec";
 
 const rawCohort = [
   "Joanne",
@@ -193,6 +193,20 @@ function buildPayload(votes) {
   };
 }
 
+function buildCompactPayload(votes) {
+  const compactVotes = Object.entries(votes)
+    .filter(([, nominees]) => Array.isArray(nominees) && nominees.length > 0)
+    .map(([category, nominees]) => ({ category, nominees }));
+
+  return {
+    event: "CBE MEng Class of 2026 Cohort Superlatives",
+    anonymous: true,
+    voteId: makeVoteId(),
+    clientSubmittedAt: new Date().toISOString(),
+    votes: compactVotes,
+  };
+}
+
 function runSelfTests() {
   const sorted = [...rawCohort].sort((a, b) => a.localeCompare(b));
   console.assert(
@@ -323,20 +337,24 @@ export default function App() {
     setSubmitState("submitting");
     setMessage("Submitting your anonymous vote...");
 
-    const payload = buildPayload(votes);
+    const payload = buildCompactPayload(votes);
+    const submitUrl = `${GOOGLE_SCRIPT_URL}?payload=${encodeURIComponent(JSON.stringify(payload))}`;
 
     try {
-      await fetch(GOOGLE_SCRIPT_URL, {
-        method: "POST",
-        mode: "no-cors",
-        headers: {
-          "Content-Type": "text/plain;charset=utf-8",
-        },
-        body: JSON.stringify(payload),
-      });
+      const iframe = document.createElement("iframe");
+      iframe.name = `vote-submit-${Date.now()}`;
+      iframe.style.display = "none";
+      iframe.src = submitUrl;
+      document.body.appendChild(iframe);
+
+      window.setTimeout(() => {
+        if (iframe.parentNode) {
+          iframe.parentNode.removeChild(iframe);
+        }
+      }, 10000);
 
       setSubmitState("success");
-      setMessage("Your anonymous vote has been submitted. Thank you!");
+      setMessage("Your anonymous vote has been sent. Please wait 5–10 seconds, then check the Votes sheet.");
     } catch (error) {
       setSubmitState("error");
       setMessage("Submission failed. Please check the Apps Script deployment URL and network connection.");
