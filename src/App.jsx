@@ -10,7 +10,7 @@ import React, { useEffect, useMemo, useState } from "react";
      - Who has access: Anyone
   5. Paste the deployed Web App URL below.
 */
-const GOOGLE_SCRIPT_URL = "https://docs.google.com/spreadsheets/d/1OvhDvQ1xKkJN-iuiWfS7rbyC31FFGP60uTjh9WgI0oM/edit?gid=0#gid=0";
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyMEbmnPI9yM9cvfkTqQeTr7ILkIzkynG6PECLgwpmCx-1A4G2gKIapNtqVd0azfht3Ww/exec";
 
 const rawCohort = [
   "Joanne",
